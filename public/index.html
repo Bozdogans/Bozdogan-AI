@@ -1,0 +1,51 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <title>Bordorn AI — Familienversion</title>
+  <style>
+    body{font-family:Arial, sans-serif; max-width:720px; margin:2rem auto; padding:0 12px;}
+    #messages{border:1px solid #ddd; padding:12px; min-height:200px; overflow:auto;}
+    .msg{margin:8px 0;}
+    input{padding:8px;}
+    button{padding:8px 12px; margin-left:8px;}
+  </style>
+</head>
+<body>
+  <h1>Bordorn AI — Familienversion</h1>
+  <div id="messages"></div>
+  <div style="margin-top:12px">
+    <input id="input" placeholder="Schreib deine Nachricht..." style="width:70%" />
+    <button id="send">Senden</button>
+  </div>
+
+  <script>
+    const msgs = document.getElementById('messages');
+    const input = document.getElementById('input');
+    document.getElementById('send').onclick = async () => {
+      const text = input.value.trim();
+      if (!text) return;
+      addMsg('Du', text);
+      input.value = '';
+      try {
+        const res = await fetch('/api/chat', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ message: text })
+        });
+        const j = await res.json();
+        addMsg('Bordorn AI', j.reply || j.error || 'Keine Antwort');
+      } catch (e) {
+        addMsg('Fehler', 'Server nicht erreichbar.');
+      }
+    };
+    function addMsg(from, text){
+      const d = document.createElement('div');
+      d.className = 'msg';
+      d.innerHTML = '<b>' + from + ':</b> ' + text;
+      msgs.appendChild(d);
+      msgs.scrollTop = msgs.scrollHeight;
+    }
+  </script>
+</body>
+</html>
